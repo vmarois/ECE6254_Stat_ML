@@ -1,0 +1,13 @@
+**.asv
+**.png
+**.h5
+**.hdf5
+**.csv
+**.pdf
+**.txt
+**.zip
+__pycache__/
+Pre-test/
+**/.idea/
+**/vmarois3-*/
+
