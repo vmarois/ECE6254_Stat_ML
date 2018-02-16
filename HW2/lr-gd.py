@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
-from sklearn import datasets 
-from math import exp
+from sklearn import datasets
 import seaborn as sns
 import time
 
@@ -31,15 +30,18 @@ def log_grad(theta, x, y):
 
 # function to compute the hessian matrix
 def hessian(theta, x):
-    g = logistic_func(theta, x)
-    return x.dot(x.T).dot(g).dot(np.ones(len(g))-g)
-
-
-def hessian2(theta, x):
+    """
+    Compute the Hessian matrix of the log-likelihood, as defined in the assignment.
+    Instead of using a one-liner like x.dot(x.T).dot(g).dot(np.ones(len(g))-g), we break it into the intermediate
+    matrix multiplications to avoid dealing with very large sparse matrices.
+    :param theta: the parameters (b, w) of the logistic regression.
+    :param x: the training instances
+    :return: The hessian matrix H
+    """
     g = logistic_func(theta, x)
     a = x.T.dot(g)
-    s = x.dot(a)
-    h = s.dot(np.ones(len(g))-g)
+    b = x.dot(a)
+    h = b.dot(np.ones(len(g))-g)
     return h
 
 
@@ -50,7 +52,7 @@ def newton_method(theta, x, y, tol, maxiter):
     nll_delta = 2.0 * tol
     iter = 0
     while (nll_delta > tol) and (iter < maxiter):
-        theta = theta - (1/hessian2(theta, x)) * log_grad(theta, x, y)
+        theta = theta - (1/hessian(theta, x)) * log_grad(theta, x, y)
         nll_vec.append(neg_log_like(theta, x, y))
         nll_delta = nll_vec[-2] - nll_vec[-1]
         iter += 1
@@ -103,7 +105,7 @@ def lr_predict(theta,x):
 
 # Generate dataset
 np.random.seed(2017)  # Set random seed so results are repeatable
-x,y = datasets.make_blobs(n_samples=100000, n_features=2, centers=2, cluster_std=6.0)
+x,y = datasets.make_blobs(n_samples=100, n_features=2, centers=2, cluster_std=6.0)
 
 # build classifier
 # form Xtilde
@@ -119,6 +121,12 @@ theta = np.zeros(shape[1]+1)
 alpha = 1e-3
 tol = 1e-3
 MAXITER = 10000
+
+# Choose one of the methods as the solver for logistic regression.
+#theta, cost, iter = grad_desc(theta, xtilde, y, alpha, tol, MAXITER)
+#theta, cost, iter = newton_method(theta, xtilde, y, tol, MAXITER)
+#theta, cost, iter = stoc_grad_desc(theta, xtilde, y, alpha, tol, MAXITER)
+#########################
 
 
 def question1(theta, xtilde, y):
@@ -214,12 +222,14 @@ def methods_comparison(theta, xtilde, y, tol, nb_test=30, verbose=False):
     print('\nAverage number of iterations for Stochastic Gradient Descent : ', np.mean(iter_stoc_grad_desc))
     print('Average run time for for Stochastic Gradient Descent : ', np.mean(time_stoc_grad_desc))
 
+    """
     # create a plot for the distribution of the number of iterations for the Stochastic Gradient Descent
     plt.figure()
     sns.distplot(iter_stoc_grad_desc, kde=True)
     plt.title('Distribution of the number of iterations for the Stochastic Gradient Descent')
     plt.savefig('dist_iter_stoc_grad_desc.png')
     plt.show()
+    """
 
 """
 # Plot the decision boundary. 
@@ -252,6 +262,6 @@ plt.show()
 """
 
 if __name__ == '__main__':
-    #question1(theta, xtilde, y)
-    methods_comparison(theta, xtilde, y, tol, nb_test=30, verbose=False)
+    question1(theta, xtilde, y)
+    methods_comparison(theta, xtilde, y, tol, nb_test=1, verbose=False)
     print('done')
