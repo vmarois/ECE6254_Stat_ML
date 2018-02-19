@@ -21,7 +21,7 @@ print('Number of disputed papers: ', nD)
 # and leaving them in could lead to unpredictable results
 #stop_words = text.ENGLISH_STOP_WORDS.union({'HAMILTON','MADISON'})
 
-stop_words = {'HAMILTON','MADISON'}
+stop_words = {'HAMILTON', 'MADISON'}
 
 # Form bag of words model using words used at least 10 times
 vectorizer = text.CountVectorizer(stop_words=stop_words, min_df=10)
@@ -41,9 +41,9 @@ print("Number of words in the first paper: ", sum(X[0,:]))
 XH, XM, XD = X[:nH,:], X[nH:nH+nM,:], X[nH+nM:,:]
 
 # Apply Laplace smoothing : See slide 15 in the fourth set of slides
-XH[XH == 0] = 1
-XM[XM == 0] = 1
-XD[XD == 0] = 1
+XH += 1
+XM += 1
+XD += 1
 
 # Estimate probability of each word in vocabulary being used by Hamilton
 fH = (XH.sum(axis=0))/XH.sum()

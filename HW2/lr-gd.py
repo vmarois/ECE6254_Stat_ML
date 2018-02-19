@@ -31,28 +31,40 @@ def log_grad(theta, x, y):
 # function to compute the hessian matrix
 def hessian(theta, x):
     """
-    Compute the Hessian matrix of the log-likelihood, as defined in the assignment.
-    Instead of using a one-liner like x.dot(x.T).dot(g).dot(np.ones(len(g))-g), we break it into the intermediate
-    matrix multiplications to avoid dealing with very large sparse matrices.
+    Compute the Hessian matrix of the log-likelihood, as H = (X.T).D.X, where D = diag( g(theta*x)(1-g(theta*x)) )
+    Instead of using a one-liner like 'x.dot(x.T).dot(g).dot(np.ones(len(g))-g)', we break it into the intermediate
+    matrix multiplications to avoid dealing with very large sparse matrices. Speed computations up.
     :param theta: the parameters (b, w) of the logistic regression.
     :param x: the training instances
-    :return: The hessian matrix H
+    :return: The hessian matrix H (3x3 matrix)
     """
     g = logistic_func(theta, x)
-    a = x.T.dot(g)
-    b = x.dot(a)
-    h = b.dot(np.ones(len(g))-g)
-    return h
+    D = np.multiply(g, np.ones(len(g)) - g)
+    D = np.diag(D)
+    L = x.T.dot(D)
+    H = L.dot(x)
+    return H
 
 
 # implementation of the newton method for logistic regression
 def newton_method(theta, x, y, tol, maxiter):
+    """
+    Implementation of Newton's method for the logistic regression solver.
+    We compute the Hessian matrix of the log-likelihood at each iteration to guide the gradient descent.
+    Should work well given that the log-likelihood is a convex function.
+    :param theta: the 3 parameters defining the 2D classification boundary for the logistic regression.
+    :param x: training instances.
+    :param y: classification labels associated to the training instances.
+    :param tol: the tolerance threshold to estimate when the gradient is vanishing (we should then have theta(n) ~theta(n-1))
+    :param maxiter: maximum number of iterations allowed.
+    :return:
+    """
     nll_vec = []
     nll_vec.append(neg_log_like(theta, x, y))
     nll_delta = 2.0 * tol
     iter = 0
     while (nll_delta > tol) and (iter < maxiter):
-        theta = theta - (1/hessian(theta, x)) * log_grad(theta, x, y)
+        theta = theta - (np.linalg.inv(hessian(theta, x))).dot(log_grad(theta, x, y))
         nll_vec.append(neg_log_like(theta, x, y))
         nll_delta = nll_vec[-2] - nll_vec[-1]
         iter += 1
@@ -75,8 +87,6 @@ def grad_desc(theta, x, y, alpha, tol, maxiter):
 
 # implementation of stochastic gradient descent for logistic regression
 def stoc_grad_desc(theta, x, y, alpha, tol, maxiter):
-
-    idx = np.random.randint(0, len(x))
 
     nll_vec = []
     nll_vec.append(neg_log_like(theta, x, y))
@@ -105,7 +115,7 @@ def lr_predict(theta,x):
 
 # Generate dataset
 np.random.seed(2017)  # Set random seed so results are repeatable
-x,y = datasets.make_blobs(n_samples=100, n_features=2, centers=2, cluster_std=6.0)
+x,y = datasets.make_blobs(n_samples=100000, n_features=2, centers=2, cluster_std=6.0)
 
 # build classifier
 # form Xtilde
@@ -118,7 +128,7 @@ xtilde[:,1:] = x
 theta = np.zeros(shape[1]+1)
 
 # Run gradient descent
-alpha = 1e-3
+alpha = 1e-6
 tol = 1e-3
 MAXITER = 10000
 
@@ -133,6 +143,7 @@ def question1(theta, xtilde, y):
     """
     Study the impact of alpha & tol on the number of iterations before convergence. Keep the other parameter constant
     when varying one.
+    Saves a plot of iterations vs alpha & tol to file.
     """
 
     # define criteria as a logspace between 10 ** -6 & 1
@@ -171,7 +182,7 @@ def methods_comparison(theta, xtilde, y, tol, nb_test=30, verbose=False):
     Compare the run time & number of iterations for all three algorithms when applied to the dataset.
     To obtain more accurate results, we average the measurements over several executions.
     :param nb_test: the number of executions taken in consideration to average the results
-    :return:
+    :return: print info on runtime & # of iterations of 3 solvers for a given dataset size.
     """
 
     print('Size of the dataset: {} data points'.format(len(y)))
@@ -198,7 +209,7 @@ def methods_comparison(theta, xtilde, y, tol, nb_test=30, verbose=False):
             print('Number of iterations needed : ', iter1)
 
         start_time = time.time()
-        _, _, iter2 = newton_method(theta,xtilde,y,tol,MAXITER)
+        _, _, iter2 = newton_method(theta, xtilde, y,tol, MAXITER)
         time_newton_method.append(time.time() - start_time)
         iter_newton_method.append(iter2)
         if verbose:
@@ -262,6 +273,6 @@ plt.show()
 """
 
 if __name__ == '__main__':
-    question1(theta, xtilde, y)
-    methods_comparison(theta, xtilde, y, tol, nb_test=1, verbose=False)
+    #question1(theta, xtilde, y)
+    methods_comparison(theta, xtilde, y, tol, nb_test=1, verbose=False)  # set nb_test = 1 if n = 1e6 or larger
     print('done')
