@@ -27,11 +27,8 @@ stop_words = {'HAMILTON', 'MADISON'}
 vectorizer = text.CountVectorizer(stop_words=stop_words, min_df=10)
 X = vectorizer.fit_transform(papersH+papersM+papersD).toarray()
 
-print(X.shape)  # This outputs a matrix of shape 80 x 1307 : each row represents a paper, for which we have the
-# frequency of apparition for 1307 vocabulary words
-
-print("\nFirst paper: ", X[0,:])
-print("Number of words in the first paper: ", sum(X[0,:]))
+# X is a matrix of shape 80 x 1307 : each row represents a paper, for which we have the frequency of apparition for 1307
+# vocabulary words
 
 # Uncomment this line to see the full list of words remaining after filtering out
 # stop words and words used less than min_df times

@@ -115,7 +115,7 @@ def lr_predict(theta,x):
 
 # Generate dataset
 np.random.seed(2017)  # Set random seed so results are repeatable
-x,y = datasets.make_blobs(n_samples=100000, n_features=2, centers=2, cluster_std=6.0)
+x,y = datasets.make_blobs(n_samples=100, n_features=2, centers=2, cluster_std=6.0)
 
 # build classifier
 # form Xtilde
@@ -128,14 +128,14 @@ xtilde[:,1:] = x
 theta = np.zeros(shape[1]+1)
 
 # Run gradient descent
-alpha = 1e-6
+alpha = 1e-3
 tol = 1e-3
 MAXITER = 10000
 
 # Choose one of the methods as the solver for logistic regression.
 #theta, cost, iter = grad_desc(theta, xtilde, y, alpha, tol, MAXITER)
 #theta, cost, iter = newton_method(theta, xtilde, y, tol, MAXITER)
-#theta, cost, iter = stoc_grad_desc(theta, xtilde, y, alpha, tol, MAXITER)
+theta, cost, iter = stoc_grad_desc(theta, xtilde, y, alpha, tol, MAXITER)
 #########################
 
 
@@ -231,7 +231,7 @@ def methods_comparison(theta, xtilde, y, tol, nb_test=30, verbose=False):
     print("Average run time for Newton's method : ", np.mean(time_newton_method))
 
     print('\nAverage number of iterations for Stochastic Gradient Descent : ', np.mean(iter_stoc_grad_desc))
-    print('Average run time for for Stochastic Gradient Descent : ', np.mean(time_stoc_grad_desc))
+    print('Average run time for Stochastic Gradient Descent : ', np.mean(time_stoc_grad_desc))
 
     """
     # create a plot for the distribution of the number of iterations for the Stochastic Gradient Descent
@@ -242,7 +242,7 @@ def methods_comparison(theta, xtilde, y, tol, nb_test=30, verbose=False):
     plt.show()
     """
 
-"""
+
 # Plot the decision boundary. 
 # Begin by creating the mesh [x_min, x_max]x[y_min, y_max].
 h = .02  # step size in the mesh
@@ -270,9 +270,9 @@ plt.xlim(xx.min(), xx.max())
 plt.ylim(yy.min(), yy.max())
 plt.title("Logistic regression classifier")
 plt.show()
-"""
+
 
 if __name__ == '__main__':
     #question1(theta, xtilde, y)
-    methods_comparison(theta, xtilde, y, tol, nb_test=1, verbose=False)  # set nb_test = 1 if n = 1e6 or larger
+    #methods_comparison(theta, xtilde, y, tol, nb_test=1, verbose=False)  # set nb_test = 1 if n = 1e6 or larger
     print('done')
